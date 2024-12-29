@@ -13,15 +13,41 @@ public class ReportGenerationVisitor implements FinancialVisitor {
 
     @Override
     public void visitEntry(FinancialEntry entry) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        report.append("    ".repeat(indentationLevel));
+
+        report.append(String.format(
+                "- %s: %.2f %s (%s) - %s%n",
+                entry.getType(),
+                entry.getAmount(),
+                entry.getCurrency(),
+                entry.getDate(),
+                entry.getDescription()
+        ));
     }
 
     @Override
     public void visitGroup(FinancialGroup group) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        report.append("    ".repeat(indentationLevel));
+
+        report.append(String.format("Group: %s (Base Currency: %s)%n",
+                group.getName(),
+                group.getCurrency()
+        ));
+
+        indentationLevel++;
+
+        for (FinancialComponent component : group.getComponents()) {
+            component.accept(this);
+        }
+
+        indentationLevel--;
+
+        if (indentationLevel == 0) {
+            report.append("\n");
+        }
     }
 
     public String getReport() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return report.toString();
     }
 }

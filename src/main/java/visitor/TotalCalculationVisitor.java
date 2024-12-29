@@ -13,15 +13,27 @@ public class TotalCalculationVisitor implements FinancialVisitor {
 
     @Override
     public void visitEntry(FinancialEntry entry) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        String currency = entry.getCurrency();
+        double amount = entry.getAmount();
+
+        if (entry.getType() == TransactionType.EXPENSE) {
+            amount = -amount;
+        }
+        totalsByCurrency.merge(currency, amount, Double::sum);
     }
 
     @Override
     public void visitGroup(FinancialGroup group) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        for (FinancialComponent component : group.getComponents()) {
+            component.accept(this);
+        }
     }
 
     public Map<String, Double> getTotalsByCurrency() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return new HashMap<>(totalsByCurrency);
+    }
+
+    public void resetTotalByCurrency () {
+        totalsByCurrency.clear();
     }
 }

@@ -1,6 +1,7 @@
 package visitor;
 
-import modelStructure.*;
+import modelStructure.FinancialEntry;
+import modelStructure.FinancialGroup;
 import java.util.Map;
 
 public class CurrencyConversionVisitor implements FinancialVisitor {
@@ -16,15 +17,39 @@ public class CurrencyConversionVisitor implements FinancialVisitor {
 
     @Override
     public void visitEntry(FinancialEntry entry) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        String entryCurrency = entry.getCurrency();
+
+        if (entryCurrency.equals(targetCurrency)) {
+            convertedTotal += entry.getAmount();
+            return;
+        }
+
+        Double sourceRate = exchangeRates.get(entryCurrency);
+        Double targetRate = exchangeRates.get(targetCurrency);
+
+        if (sourceRate == null || targetRate == null) {
+            throw new IllegalStateException(
+                    "Exchange rate not found for conversion from " +
+                            entryCurrency + " to " + targetCurrency
+            );
+        }
+
+        double convertedAmount = entry.getAmount() * (sourceRate / targetRate);
+        convertedTotal += convertedAmount;
     }
 
     @Override
     public void visitGroup(FinancialGroup group) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        // Для групи нічого не робимо, оскільки всі обчислення
+        // виконуються при відвідуванні окремих записів
+        // Група сама викличе accept() для всіх своїх компонентів
     }
 
     public double getConvertedTotal() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return convertedTotal;
+    }
+
+    public void resetConvertedTotal() {
+        convertedTotal = 0.0;
     }
 }

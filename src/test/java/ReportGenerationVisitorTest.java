@@ -1,40 +1,48 @@
+import visitor.*;
+
 import modelStructure.*;
-import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Test;
-import visitor.ReportGenerationVisitor;
 
 import java.time.LocalDate;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ReportGenerationVisitorTest {
-    private ReportGenerationVisitor visitor;
-    private FinancialGroup rootGroup;
-
-    @BeforeEach
-    void setUp() {
-        visitor = new ReportGenerationVisitor();
-
-        rootGroup = new FinancialGroup("Root", "USD");
-        FinancialGroup subGroup = new FinancialGroup("SubGroup", "USD");
-
-        subGroup.addComponent(new FinancialEntry(1000.0, "Entry 1", "USD",
-                LocalDate.now(), TransactionType.INCOME));
-        rootGroup.addComponent(subGroup);
-        rootGroup.addComponent(new FinancialEntry(500.0, "Entry 2", "USD",
-                LocalDate.now(), TransactionType.EXPENSE));
-    }
+public class ReportGenerationVisitorTest {
 
     @Test
-    void getReport_ShouldGenerateFormattedReport() {
-        rootGroup.accept(visitor);
+    public void testReportGenerationVisitorWithoutGroupHeader() {
+        Locale.setDefault(Locale.US);
+
+        FinancialEntry entry1 = new FinancialEntry(100.0, "Salary", "USD", LocalDate.of(2024, 12, 1), TransactionType.INCOME);
+        FinancialEntry entry2 = new FinancialEntry(50.0, "Groceries", "USD", LocalDate.of(2024, 12, 15), TransactionType.EXPENSE);
+        FinancialEntry entry3 = new FinancialEntry(200.0, "Freelance", "USD", LocalDate.of(2024, 12, 10), TransactionType.INCOME);
+
+        FinancialGroup group = new FinancialGroup("Monthly Budget", "USD");
+        group.addComponent(entry1);
+        group.addComponent(entry2);
+        group.addComponent(entry3);
+
+        ReportGenerationVisitor visitor = new ReportGenerationVisitor();
+
+        group.accept(visitor);
+
         String report = visitor.getReport();
 
-        assertTrue(report.contains("Root"));
-        assertTrue(report.contains("SubGroup"));
-        assertTrue(report.contains("Entry 1"));
-        assertTrue(report.contains("Entry 2"));
-        assertTrue(report.contains("1000.0"));
-        assertTrue(report.contains("500.0"));
+        String filteredReport = report.lines()
+                .filter(line -> line.startsWith("    - INCOME") || line.startsWith("    - EXPENSE"))
+                .map(line -> line.trim()) // Remove leading spaces
+                .reduce((line1, line2) -> line1 + "\n" + line2)
+                .orElse("");
+
+        String expectedReport =
+                "- INCOME: 100.00 USD (2024-12-01) - Salary\n" +
+                        "- EXPENSE: 50.00 USD (2024-12-15) - Groceries\n" +
+                        "- INCOME: 200.00 USD (2024-12-10) - Freelance";
+
+        assertEquals(expectedReport, filteredReport);
     }
 }

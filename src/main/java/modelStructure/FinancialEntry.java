@@ -20,7 +20,7 @@ public class FinancialEntry implements FinancialComponent {
 
     @Override
     public double calculateTotal() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return amount;
     }
 
     @Override
@@ -30,28 +30,27 @@ public class FinancialEntry implements FinancialComponent {
 
     @Override
     public void accept(FinancialVisitor visitor) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        visitor.visitEntry(this);
     }
 
     @Override
     public String getCurrency() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return currency;
     }
 
     public double getAmount() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return amount;
     }
 
     public String getDescription() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return description;
     }
 
     public LocalDate getDate() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return date;
     }
 
     public TransactionType getType() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return type;
     }
-
 }
